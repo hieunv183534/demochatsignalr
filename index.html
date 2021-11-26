@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <input type="text" id="userInput">
+    <button id="btnJoin"> Kết nối </button>
+    <input type="text" id="messageInput">
+    <button id="btnSend"> Send </button>
+    <script>
+        var input1 = document.getElementById("userInput");
+        var input2 = document.getElementById("messageInput");
+        var connection;
+        document.getElementById("btnJoin").addEventListener('click', async() => {
+            var user = input1.value;
+            try {
+                connection = new signalR.HubConnectionBuilder()
+                    .withUrl("http://balohieunv.somee.com/chat")
+                    .configureLogging(signalR.LogLevel.Information)
+                    .build();
+
+                connection.on("onmessage", (user, message) => {
+                    console.log(`${user} say ${message}`);
+                });
+
+                await connection.start();
+                await connection.invoke("JoinChat", user);
+
+            } catch (error) {
+                console.log(error);
+            }
+        });
+
+
+        document.getElementById("btnSend").addEventListener('click', async() => {
+            var message = input2.value;
+            try {
+                await connection.invoke("Send", `${input1.value} say ${message}`);
+
+            } catch (error) {
+                console.log(error);
+            }
+        })
+    </script>
+</body>
+
+</html>
